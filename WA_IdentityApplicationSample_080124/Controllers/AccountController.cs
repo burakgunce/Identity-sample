@@ -25,6 +25,27 @@ namespace WA_IdentityApplicationSample_080124.Controllers
             return View(login);
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> Login(Login login)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser appUser = await userManager.FindByEmailAsync(login.Email);
+                if (appUser != null)
+                {
+                    await signInManager.SignOutAsync();
+                    Microsoft.AspNetCore.Identity.SignInResult result = await signInManager.PasswordSignInAsync(appUser, login.Password, false, false);
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("Index","Home");
+                    }
+                }
+                ModelState.AddModelError(nameof(login.Email), "login failed email or password wrong");
+            }
+            return View(login);
+        }
+
         public IActionResult Index()
         {
             return View();
